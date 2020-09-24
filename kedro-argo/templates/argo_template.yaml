@@ -4,6 +4,16 @@ metadata:
   generateName: {{ .Values.project_name }}
 spec:
   entrypoint: dag
+  volumeClaimTemplates:
+  - metadata:
+      name: data
+    spec:
+      accessModes:
+        - "ReadWriteMany"
+      storageClassName: {{ .Values.storage_class }}
+      resources:
+        requests:
+          storage: 10Gi
   templates:
   - name: kedro
     retryStrategy:
@@ -14,7 +24,10 @@ spec:
     container:
       image: {{ .Values.image }}
       command: [/bin/sh]
-      args: ["-c", {{printf "kedro run -n {{%s}}" "inputs.parameters.kedro_node" | quote}}]
+      args: ["-c", {{printf "kedro run -n {{%s}} --env=argo" "inputs.parameters.kedro_node" | quote}}]
+      volumeMounts:
+        - name: data
+          mountPath: /home/kedro/data
   - name: dag
     dag:
       tasks:

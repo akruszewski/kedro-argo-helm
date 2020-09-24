@@ -2,3 +2,4 @@ project_name:
 image:
 tasks: []
 namespace:
+storage_class:
